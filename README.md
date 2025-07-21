@@ -44,6 +44,19 @@ To bring the containers up, run
 docker-compose up -d
 ```
 
-```
 you can asses it on http://localhost. the traffic will be redirected to strapi
+
+TASK 4: Automating Strapi Deployment on EC2 with Terraform
+s1. Build and push the image to a public repo:
+
 ```
+docker buildx create --use
+docker buildx build --platform linux/amd64 -t nishanc7/strapi-app:latest . --push
+```
+
+s2. Add terraform files and user data in the section under instance resources
+s3.Deploy using terraform (Terraform apply)
+
+You will be able to assess the application on
+http://<ec2-public-ip>:1337
+make sure it's http not https
