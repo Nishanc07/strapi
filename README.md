@@ -54,8 +54,9 @@ docker buildx create --use
 docker buildx build --platform linux/amd64 -t nishanc7/strapi-app:latest . --push
 ```
 
-s2. Add terraform files and user data in the section under instance resources
-s3.Deploy using terraform (Terraform apply)
+S2. Add terraform files and user data in the section under instance resources
+
+S3. Deploy using terraform (Terraform apply)
 
 You will be able to assess the application on
 http://<ec2-public-ip>:1337
