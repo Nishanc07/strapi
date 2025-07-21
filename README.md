@@ -1,16 +1,49 @@
-# ✅ Contribution Rules
+# 🚀 Getting started with Strapi
 
-1. **Work in Your Own Branch**  
-   - Create a branch named after your own name.  
-   - Push all changes and tasks to your personal branch only.
+TASK 1: Understanding the folder and file structure of strapi
+Clone the repo
 
-2. **Daily Pull Request (PR)**  
-   - At the end of each day, create a Pull Request (PR) from your branch, even if your task is not yet complete.  
-   - This helps in tracking daily progress and ensures visibility.
+```
+npx create-strapi-app@latest
+```
 
-3. **Do Not Push to `main`**  
-   - Never push directly to the main branch.  
-   - All changes should go through PRs and be reviewed before merging into main.
+Content-type Builder allows the creation and management of content-types, which can be-
 
-4. **Need Help?**  
-   - For any issues or questions, feel free to reach out on Teams.
+Collection types: content-types that can manage several entries.
+Single types: content-types that can only manage one entry.
+Components: content structure that can be used in multiple collection types and single types. Although they are technically not proper content-types because they cannot exist independently, components are also created and managed through the Content-type Builder, in the same way as collection and single types.
+
+You can access this data using api
+
+Task 2:
+Building Dockerfile (refer the file)
+Build and run Dockerfile
+
+```
+docker build -t strapi-dev .
+docker run -p 1337:1337 strapi-dev
+```
+
+after this you can access strapi admin pannel locally at port 1337
+
+TASK 3:
+set up a Dockerized Strapi + PostgreSQL + Nginx environment with a user-defined network:
+
+- Create a Docker network
+
+```
+docker network create my-network
+```
+
+- Create an Nginx config file (e.g., default.conf), where you define how nginx should divert the traffic to. make sure nginx is sending traffic to strai application. Nginx listens on port 80
+- in your docker-compose file you are running 3 containers. postgres connected to strapi and nginx as a reverse proxy
+
+To bring the containers up, run
+
+```
+docker-compose up -d
+```
+
+```
+you can asses it on http://localhost. the traffic will be redirected to strapi
+```
