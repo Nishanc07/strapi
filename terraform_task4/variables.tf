@@ -1,9 +1,7 @@
-variable "key_name" {
-  description = "EC2 key pair name"
-  default = "strapi-key"
+variable "image_tag" {
+  description = "Docker image tag to use"
   type        = string
 }
-
 
 
 

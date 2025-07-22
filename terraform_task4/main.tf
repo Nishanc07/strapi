@@ -10,13 +10,13 @@ resource "aws_security_group" "strapi_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # allow SSH from anywhere (secure it later)
+    cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
     from_port   = 1337
     to_port     = 1337
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Strapi default port
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     from_port   = 0
@@ -53,7 +53,7 @@ resource "aws_instance" "nisha_ec2" {
 
     sleep 10
 
-    docker pull nishanc7/strapi-app:${image_tag}
+    docker pull nishanc7/strapi:latest
 
     docker run -d --name strapi --network my-network \
         -e DATABASE_CLIENT=postgres \
@@ -69,7 +69,7 @@ resource "aws_instance" "nisha_ec2" {
         -e TRANSFER_TOKEN_SALT='bvqS1Wdms+TMgaZ+brhE9A==' \
         -e ENCRYPTION_KEY='vYbedSqFjzpJgzGquSU8Mw==' \
         -p 1337:1337 \
-        nishanc7/strapi-app:${image_tag}
+        nishanc7/strapi:latest
   EOF
 
   tags = {
