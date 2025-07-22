@@ -53,7 +53,7 @@ resource "aws_instance" "nisha_ec2" {
 
     sleep 10
 
-    docker pull nishanc7/strapi:${var.docker_image_tag}
+    docker pull nishanc7/strapi:${var.image_tag}
 
     docker run -d --name strapi --network my-network \
         -e DATABASE_CLIENT=postgres \
@@ -69,7 +69,7 @@ resource "aws_instance" "nisha_ec2" {
         -e TRANSFER_TOKEN_SALT='bvqS1Wdms+TMgaZ+brhE9A==' \
         -e ENCRYPTION_KEY='vYbedSqFjzpJgzGquSU8Mw==' \
         -p 1337:1337 \
-        nishanc7/strapi:${var.docker_image_tag}
+        nishanc7/strapi:${var.image_tag}
   EOF
 
   tags = {
