@@ -27,10 +27,11 @@ resource "aws_security_group" "strapi_sg" {
 }
 
 resource "aws_instance" "nisha_ec2" {
-  ami                    = "ami-0c55b159cbfafe1f0" # Example: Ubuntu in us-east-2, change if needed
+  ami                    = "ami-0c55b159cbfafe1f0"
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.strapi_sg.id]
+
   user_data = <<-EOF
     #!/bin/bash
     apt update -y
@@ -52,7 +53,7 @@ resource "aws_instance" "nisha_ec2" {
 
     sleep 10
 
-    docker pull nishanc7/strapi-app:latest
+    docker pull nishanc7/strapi-app:${image_tag}
 
     docker run -d --name strapi --network my-network \
         -e DATABASE_CLIENT=postgres \
@@ -68,7 +69,7 @@ resource "aws_instance" "nisha_ec2" {
         -e TRANSFER_TOKEN_SALT='bvqS1Wdms+TMgaZ+brhE9A==' \
         -e ENCRYPTION_KEY='vYbedSqFjzpJgzGquSU8Mw==' \
         -p 1337:1337 \
-        nishanc7/strapi-app:latest
+        nishanc7/strapi-app:${image_tag}
   EOF
 
   tags = {

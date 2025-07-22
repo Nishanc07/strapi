@@ -25,25 +25,25 @@ jobs:
           install: true
           use: true
 
-      - name: Extract short SHA
-        id: vars
-        run: echo "TAG=gh-${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: Set registry user and tag
+        run: |
+          echo "REGISTRY_USER=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+          echo "TAG=gh-${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./my-strapi-project
+          file: ./my-strapi-project/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/strapi:${{ env.TAG }}
+          tags: ${{ env.REGISTRY_USER }}/strapi:${{ env.TAG }}
 
       - name: Save image tag as output
         id: output
         run: echo "tag=${{ env.TAG }}" >> $GITHUB_OUTPUT
 
       - name: Create tag.txt file
-        run: |
-          echo "${{ env.TAG }}" > tag.txt
+        run: echo "${{ env.TAG }}" > tag.txt
 
       - name: Upload image tag as artifact
         uses: actions/upload-artifact@v4
