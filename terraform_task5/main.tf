@@ -28,7 +28,7 @@ resource "aws_security_group" "strapi_sg" {
 
 resource "aws_instance" "nisha_ec2" {
   ami                    = "ami-0c55b159cbfafe1f0"
-  instance_type          = "t2.micro"
+  instance_type          = "t3.micro"
   key_name               = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.strapi_sg.id]
 
