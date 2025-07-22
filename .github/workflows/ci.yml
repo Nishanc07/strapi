@@ -46,7 +46,7 @@ jobs:
           echo "${{ env.TAG }}" > tag.txt
 
       - name: Upload image tag as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image-tag
           path: tag.txt
