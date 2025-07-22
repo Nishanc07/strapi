@@ -1,17 +1,7 @@
-provider "aws" {
-  # Configuration options
-  region = "us-east-2"
+resource "aws_key_pair" "deployer" {
+  key_name   = "strapi-key-nisha"
+  public_key = file("~/.ssh/id_rsa.pub")
 }
-resource "tls_private_key" "ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "generated_key" {
-  key_name   = "terraform-key"
-  public_key = tls_private_key.ssh_key.public_key_openssh
-}
-
 
 resource "aws_security_group" "strapi_sg" {
   name        = "nisha-strapi-sg"
@@ -20,13 +10,13 @@ resource "aws_security_group" "strapi_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # allow SSH from anywhere (secure it later)
+    cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
     from_port   = 1337
     to_port     = 1337
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Strapi default port
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     from_port   = 0
@@ -37,10 +27,11 @@ resource "aws_security_group" "strapi_sg" {
 }
 
 resource "aws_instance" "nisha_ec2" {
-  ami                    = "ami-0c55b159cbfafe1f0" # Example: Ubuntu in us-east-2, change if needed
+  ami                    = "ami-0c55b159cbfafe1f0"
   instance_type          = "t2.micro"
-  key_name               = aws_key_pair.generated_key.key_name
+  key_name               = aws_key_pair.deployer.key_name
   vpc_security_group_ids = [aws_security_group.strapi_sg.id]
+
   user_data = <<-EOF
     #!/bin/bash
     apt update -y
@@ -62,7 +53,7 @@ resource "aws_instance" "nisha_ec2" {
 
     sleep 10
 
-    docker pull nishanc7/strapi-app:${var.image_tag}
+    docker pull nishanc7/strapi:${var.docker_image_tag}
 
     docker run -d --name strapi --network my-network \
         -e DATABASE_CLIENT=postgres \
@@ -78,11 +69,10 @@ resource "aws_instance" "nisha_ec2" {
         -e TRANSFER_TOKEN_SALT='bvqS1Wdms+TMgaZ+brhE9A==' \
         -e ENCRYPTION_KEY='vYbedSqFjzpJgzGquSU8Mw==' \
         -p 1337:1337 \
-        nishanc7/strapi-app:${var.image_tag}
-
+        nishanc7/strapi:${var.docker_image_tag}
   EOF
 
   tags = {
-    Name = "Nisha_Strapi_t5"
+    Name = "Nisha_Strapi"
   }
 }
