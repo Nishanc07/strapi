@@ -1,0 +1,42 @@
+name: CD - Deploy with Terraform
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      IMAGE_TAG: ${{ github.event.inputs.image_tag }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download Docker image tag
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-image-tag
+
+      - name: Set Docker image tag
+        id: tag
+        run: |
+          echo "IMAGE_TAG=$(cat tag.txt)" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform_task5
+
+      - name: Terraform Plan
+        run: terraform plan -var="image_tag=${{ env.IMAGE_TAG }}"
+        working-directory: ./terraform_task5
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var="image_tag=${{ env.IMAGE_TAG }}" -var="public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+        working-directory: ./terraform_task5
