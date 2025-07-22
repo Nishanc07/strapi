@@ -61,3 +61,19 @@ S3. Deploy using terraform (Terraform apply)
 You will be able to assess the application on
 http://<ec2-public-ip>:1337
 make sure it's http not https
+
+TASK 5:
+Automate Strapi Deployment with GitHub Actions + Terraform
+
+1. CI/CD - Code Pipeline
+   Set up .github/workflows/ci.yml to:
+   Run on push to main branch.
+   Build Docker image of Strapi.
+   Push to Docker Hub
+   Save image tag as GitHub Action output.
+2. CD - Terraform Pipeline
+   Set up .github/workflows/terraform.yml to:
+   Be manually triggered (workflow_dispatch)
+   Run terraform init, plan, and apply
+   Use GitHub Secrets for AWS credentials
+   Use output image tag to pull and deploy container on EC2
