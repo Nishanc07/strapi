@@ -33,8 +33,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: my-strapi-project/Dockerfile
+          context: ./my-strapi-project
+          file: ./my-strapi-project/Dockerfile
           push: true
           tags: ${{ env.REGISTRY_USER }}/strapi:${{ env.TAG }}
 
