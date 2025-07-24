@@ -129,3 +129,63 @@ Automate Strapi Deployment with GitHub Actions + Terraform
 
 
 ```
+
+✅ TASK 6: Deploy a Strapi application on AWS using ECS Fargate, managed entirely via Terraform
+
+1. Push the image to ECR.
+
+- create a ecr repository
+
+```
+aws ecr create-repository --repository-name nisha-ecr
+
+```
+
+-Authentication
+
+```
+aws ecr get-login-password | docker login --username AWS --password-stdin 607700977843.dkr.ecr.us-east-2.amazonaws.com
+
+```
+
+2. Containerize the Strapi app using Docker.
+   -Create a buildx builder
+   -This builds for ECS-compatible architecture and directly pushes to your ECR.
+
+```
+docker buildx create --name nisha-ecr --use
+
+docker buildx build \
+  --platform linux/amd64 \
+  -t 607700977843.dkr.ecr.us-east-2.amazonaws.com/nisha-ecr:latest \
+  . \
+  --push
+
+```
+
+3. Terraform to create ECS + fargate with ALB
+
+- Use terraform import when: A resource already exists (created manually or via AWS Console). You want to bring it under Terraform control. (only if you get error)
+
+```
+terraform import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
+```
+
+- Get subnets for your default VPC for ALB
+
+```
+ aws ec2 describe-subnets \
+  --filters "Name=vpc-id,Values=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)" \
+  --region us-east-2 \
+  --query 'Subnets[].[SubnetId,AvailabilityZone]' \
+  --output text
+```
+
+- Create a rds.tf file to configure the postgres db. Give all the inofrmation required to connect rds to strapi under ecs task definition.
+
+Once you havea all your files
+
+```
+terraform init
+terraform apply
+```
