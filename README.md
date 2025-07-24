@@ -129,3 +129,36 @@ Automate Strapi Deployment with GitHub Actions + Terraform
 
 
 ```
+
+✅ TASK 6: Deploy a Strapi application on AWS using ECS Fargate, managed entirely via Terraform
+
+1. Push the image to ECR.
+
+- create a ecr repository
+
+```
+aws ecr create-repository --repository-name nisha-ecr
+
+```
+
+-Authentication
+
+```
+aws ecr get-login-password | docker login --username AWS --password-stdin 607700977843.dkr.ecr.us-east-2.amazonaws.com
+
+```
+
+2. Containerize the Strapi app using Docker.
+   -Create a buildx builder
+   -This builds for ECS-compatible architecture and directly pushes to your ECR.
+
+```
+docker buildx create --name nisha-ecr --use
+
+docker buildx build \
+  --platform linux/amd64 \
+  -t 607700977843.dkr.ecr.us-east-2.amazonaws.com/nisha-ecr:latest \
+  . \
+  --push
+
+```
