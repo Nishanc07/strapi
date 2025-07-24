@@ -162,3 +162,30 @@ docker buildx build \
   --push
 
 ```
+
+3. Terraform to create ECS + fargate with ALB
+
+- Use terraform import when: A resource already exists (created manually or via AWS Console). You want to bring it under Terraform control. (only if you get error)
+
+```
+terraform import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
+```
+
+- Get subnets for your default VPC for ALB
+
+```
+ aws ec2 describe-subnets \
+  --filters "Name=vpc-id,Values=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text)" \
+  --region us-east-2 \
+  --query 'Subnets[].[SubnetId,AvailabilityZone]' \
+  --output text
+```
+
+- Create a rds.tf file to configure the postgres db. Give all the inofrmation required to connect rds to strapi under ecs task definition.
+
+Once you havea all your files
+
+```
+terraform init
+terraform apply
+```
