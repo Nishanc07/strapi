@@ -43,25 +43,27 @@ jobs:
           }
 
       - name: Terraform Init
+        working-directory: terraform_task7
         run: |
           cd terraform_task7
           terraform init
 
-      - name: Import existing resources
+      - name: Terraform Import (optional step for first-time import)
+        working-directory: terraform_task7
         run: |
           cd terraform_task7
-          terraform init
-          terraform plan
           terraform import aws_security_group.nisha_ecs_sg sg-xxxx || true
           terraform import aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi || true
           terraform import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole || true
 
       - name: Terraform Plan
+        working-directory: terraform_task7
         run: |
           cd terraform_task7
           terraform plan -var="image_tag=${{ env.IMAGE_TAG }}"
 
       - name: Terraform Apply
+        working-directory: terraform_task7
         run: |
           cd terraform_task7
           terraform apply -auto-approve -var="image_tag=${{ env.IMAGE_TAG }}"
