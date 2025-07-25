@@ -1,4 +1,4 @@
-# don't push these files
+
 terraform.tfstate
 terraform.tfstate.*
 crash.log

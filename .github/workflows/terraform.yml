@@ -51,15 +51,15 @@ jobs:
         run: |
           cd terraform_task7
 
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_db_subnet_group.nisha_db_subnet_group nisha-db-subnet-group
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_security_group.nisha_ecs_sg sg-0ae4a4fa845669068
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_lb_target_group.nisha_strapi_tg arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/nisha-strapi-tg/0b7d7975021cd54d
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_lb.nisha_alb arn:aws:elasticloadbalancing:us-east-2:607700977843:loadbalancer/app/nisha/6c3a1447f7861af3
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_lb_listener.http arn:aws:elasticloadbalancing:us-east-2:607700977843:listener/app/nisha/6c3a1447f7861af3/8ccf0374a0a40626
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_ecs_service.nisha_service your-cluster-name/nisha-service
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_ecs_service.nisha_service arn:aws:ecs:us-east-2:607700977843:service/nisha-cluster/nisha-service
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_db_subnet_group.nisha_db_subnet_group nisha-db-subnet-group
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_security_group.nisha_ecs_sg sg-0ae4a4fa845669068
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_lb_target_group.nisha_strapi_tg arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/nisha-strapi-tg/0b7d7975021cd54d
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_lb.nisha_alb arn:aws:elasticloadbalancing:us-east-2:607700977843:loadbalancer/app/nisha/6c3a1447f7861af3
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_lb_listener.http arn:aws:elasticloadbalancing:us-east-2:607700977843:listener/app/nisha/6c3a1447f7861af3/8ccf0374a0a40626
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_ecs_service.nisha_service your-cluster-name/nisha-service
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_ecs_service.nisha_service arn:aws:ecs:us-east-2:607700977843:service/nisha-cluster/nisha-service
 
       - name: Terraform Plan
         run: |
