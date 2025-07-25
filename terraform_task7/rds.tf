@@ -1,4 +1,4 @@
-resource "aws_db_subnet_group" "strapi_db_subnet_group" {
+resource "aws_db_subnet_group" "nisha_db_subnet_group" {
   name       = "nisha-db-subnet-group"
   subnet_ids = data.aws_subnets.default.ids
 

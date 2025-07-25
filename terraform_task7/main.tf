@@ -1,18 +1,7 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-  required_version = ">= 1.3.0"
-}
-
 provider "aws" {
-  region = var.region
+  region = "us-east-2"
 }
 
-# --- Data sources ---
 data "aws_vpc" "default" {
   default = true
 }
@@ -24,40 +13,22 @@ data "aws_subnets" "default" {
   }
 }
 
-
-
-# --- IAM Role for ECS ---
-resource "aws_iam_role" "ecs_task_execution_role_new" {
-  name = "ecsTaskExecutionRole"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
-  role       = aws_iam_role.ecs_task_execution_role_new.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-# --- Security Group ---
-resource "aws_security_group" "nisha_ecs_sg_new" {
-  name        = "nisha-sg-new"
-  description = "Allow HTTP and DB access"
+# Security group for ECS service
+resource "aws_security_group" "nisha_ecs_sg" {
+  name        = "nisha-strapi-sg"
+  description = "Allow HTTP/Strapi traffic"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 1337
+    to_port     = 1337
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -77,104 +48,147 @@ resource "aws_security_group" "nisha_ecs_sg_new" {
   }
 }
 
-# --- Log Group ---
-resource "aws_cloudwatch_log_group" "nisha_strapi_new" {
-  name              = "/ecs/nisha-strapi-new"
-  retention_in_days = 7
-}
-
-# --- ECS Task Definition ---
-resource "aws_ecs_task_definition" "nisha_task" {
-  family                   = "nisha-strapi"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "512"
-  memory                   = "1024"
-  execution_role_arn       = aws_iam_role.ecs_task_execution_role_new.arn
-  container_definitions    = jsonencode([
-    {
-      name      = "strapi"
-      image     = "607700977843.dkr.ecr.us-east-2.amazonaws.com/nisha-ecr:${var.image_tag}"
-      essential = true
-      portMappings = [
-        {
-          containerPort = 1337
-          hostPort      = 1337
-        }
-      ]
-      logConfiguration = {
-        logDriver = "awslogs",
-        options = {
-          awslogs-group         = aws_cloudwatch_log_group.nisha_strapi_new.name,
-          awslogs-region        = var.region,
-          awslogs-stream-prefix = "strapi"
-        }
-      }
-    }
-  ])
-}
-
-# --- Application Load Balancer ---
 resource "aws_lb" "nisha_alb" {
-  name               = "nisha-alb"
+  name               = "nisha"
   internal           = false
   load_balancer_type = "application"
-  subnets            = data.aws_subnets.default.ids
-  security_groups    = [aws_security_group.nisha_ecs_sg_new.id]
+  subnets = [
+    "subnet-0c0bb5df2571165a9", # us-east-2a
+    "subnet-0cc2ddb32492bcc41", # us-east-2b
+    "subnet-0f768008c6324831f"  # us-east-2c
+  ]
+  security_groups = [aws_security_group.nisha_ecs_sg.id]
+  enable_deletion_protection = false
 }
 
-resource "aws_lb_target_group" "nisha_alb_tg_new" {
-  name     = "nisha-alb-tg-new"
-  port     = 1337
-  protocol = "HTTP"
-  vpc_id   = data.aws_vpc.default.id
+
+
+resource "aws_lb_target_group" "nisha_strapi_tg" {
+  name        = "nisha-strapi-tg"
+  port        = 1337
+  protocol    = "HTTP"
+  vpc_id      = data.aws_vpc.default.id
   target_type = "ip"
+
   health_check {
     path                = "/"
+    port                = "1337"
     protocol            = "HTTP"
-    matcher             = "200-399"
+    matcher             = "200"
     interval            = 30
     timeout             = 5
-    healthy_threshold   = 5
+    healthy_threshold   = 2
     unhealthy_threshold = 2
   }
 }
 
-resource "aws_lb_listener" "nisha_alb_listener" {
+resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.nisha_alb.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.nisha_alb_tg_new.arn
+    target_group_arn = aws_lb_target_group.nisha_strapi_tg.arn
   }
 }
 
-# --- ECS Cluster ---
 resource "aws_ecs_cluster" "nisha_cluster" {
   name = "nisha-cluster"
 }
 
-# --- ECS Service ---
+resource "aws_cloudwatch_log_group" "nisha_strapi" {
+  name              = "/ecs/nisha-strapi"
+  retention_in_days = 7
+}
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action    = "sts:AssumeRole"
+      Effect    = "Allow"
+      Principal = {
+        Service = "ecs-tasks.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_ecs_task_definition" "nisha_task" {
+  family                   = "nisha-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "512"
+  memory                   = "1024"
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "strapi"
+      image     = "${var.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.ecr_repo_name}:${var.image_tag}"
+      essential = true
+      portMappings = [
+        {
+          containerPort = 1337
+          protocol      = "tcp"
+        }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = "/ecs/nisha-strapi",
+          awslogs-region        = "us-east-2",
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+      environment = [
+        { name = "DATABASE_CLIENT", value = "postgres" },
+        { name = "DATABASE_HOST", value = aws_db_instance.nisha_rds.address },
+        { name = "DATABASE_PORT", value = "5432" },
+        { name = "DATABASE_NAME", value = "strapidb" },
+        { name = "DATABASE_USERNAME", value = "nisha" },
+        { name = "DATABASE_PASSWORD", value = "nisha123" },
+        { name = "DATABASE_SSL", value = "false" },
+
+        # Strapi secrets
+        { name = "APP_KEYS", value = "090TadpTTRZvuM5Fu75COQ==,c8udgtcvVKlGDIMcmqKu+w==,tsHHrNzqiXFBjHNM/79rbA==,/nRmlzj0U/XxgDh8AYzteA==" },
+        { name = "API_TOKEN_SALT", value = "oo7Y59VwBZjdfVsTevVUAQ==" },
+        { name = "ADMIN_JWT_SECRET", value = "V0bNAdPbUmZPcTeVeRSZDw==" },
+        { name = "TRANSFER_TOKEN_SALT", value = "bvqS1Wdms+TMgaZ+brhE9A==" },
+        { name = "ENCRYPTION_KEY", value = "vYbedSqFjzpJgzGquSU8Mw==" }
+      ]
+    }
+  ])
+}
+
 resource "aws_ecs_service" "nisha_service" {
   name            = "nisha-service"
   cluster         = aws_ecs_cluster.nisha_cluster.id
   task_definition = aws_ecs_task_definition.nisha_task.arn
   launch_type     = "FARGATE"
   desired_count   = 1
+  force_new_deployment = true
 
   network_configuration {
-    subnets          = data.aws_subnets.default.ids
-    security_groups  = [aws_security_group.nisha_ecs_sg_new.id]
+    subnets         = data.aws_subnets.default.ids
+    security_groups = [aws_security_group.nisha_ecs_sg.id]
     assign_public_ip = true
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.nisha_alb_tg_new.arn
+    target_group_arn = aws_lb_target_group.nisha_strapi_tg.arn
     container_name   = "strapi"
     container_port   = 1337
   }
 
-  depends_on = [aws_lb_listener.nisha_alb_listener]
+  depends_on = [aws_lb_listener.http]
 }
