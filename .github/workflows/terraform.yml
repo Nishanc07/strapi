@@ -47,6 +47,11 @@ jobs:
           cd terraform_task7
           terraform init
 
+      - name: Terraform Import
+        run: |
+          cd terraform_task7
+          terraform import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
+
       - name: Terraform Plan
         run: |
           cd terraform_task7
