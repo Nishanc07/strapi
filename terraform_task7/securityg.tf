@@ -1,5 +1,5 @@
-resource "aws_security_group" "nisha_ecr_sg" {
-  name        = "nisha-sg"
+resource "aws_security_group" "nisha_sg" {
+  name        = "nisha-ecr-sg"
   description = "Allow HTTP/Strapi traffic"
   vpc_id      = data.aws_vpc.default.id
 

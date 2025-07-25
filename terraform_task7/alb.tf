@@ -7,7 +7,7 @@ resource "aws_lb" "nisha_alb" {
     "subnet-0cc2ddb32492bcc41", # us-east-2b
     "subnet-0f768008c6324831f"  # us-east-2c
   ]
-  security_groups = [aws_security_group.nisha_ecr_sg.id]
+  security_groups = [aws_security_group.nisha_sg.id]
   enable_deletion_protection = false
 }
 

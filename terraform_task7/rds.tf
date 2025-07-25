@@ -21,7 +21,7 @@ resource "aws_db_instance" "nisha_rds" {
   username               = "nisha"
   password               = "nisha123"
   db_subnet_group_name   = aws_db_subnet_group.nish_db_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.nisha_ecr_sg.id]
+  vpc_security_group_ids = [aws_security_group.nisha_sg.id]
   skip_final_snapshot    = true
   publicly_accessible    = true
 

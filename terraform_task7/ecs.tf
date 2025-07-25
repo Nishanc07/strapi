@@ -85,7 +85,7 @@ resource "aws_ecs_service" "nisha_service" {
 
   network_configuration {
     subnets         = data.aws_subnets.default.ids
-    security_groups = [aws_security_group.nisha_ecr_sg.id]
+    security_groups = [aws_security_group.nisha_sg.id]
     assign_public_ip = true
   }
 
