@@ -3,6 +3,10 @@ resource "aws_security_group" "nisha_ecr_sg" {
   description = "Allow HTTP/Strapi traffic"
   vpc_id      = data.aws_vpc.default.id
 
+  lifecycle {
+    prevent_destroy = false
+  }
+
   ingress {
     from_port   = 80
     to_port     = 80

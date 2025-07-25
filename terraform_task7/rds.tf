@@ -2,6 +2,10 @@ resource "aws_db_subnet_group" "strapi_db_subnet_group" {
   name       = "strapi-db-subnet-group"
   subnet_ids = data.aws_subnets.default.ids
 
+  lifecycle {
+    prevent_destroy = false
+  }
+
   tags = {
     Name = "Strapi DB Subnet Group"
   }
