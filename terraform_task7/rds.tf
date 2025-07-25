@@ -12,6 +12,7 @@ resource "aws_db_subnet_group" "nish_db_subnet_group" {
 }
 
 resource "aws_db_instance" "nisha_rds" {
+  identifier             = "nisha-postgres-db"  
   allocated_storage      = 20
   storage_type           = "gp2"
   engine                 = "postgres"
