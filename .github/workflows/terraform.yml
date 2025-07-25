@@ -52,8 +52,6 @@ jobs:
         working-directory: terraform_task7
         run: |
           cd terraform_task7
-          terraform import aws_security_group.nisha_ecs_sg sg-xxxx || true
-          terraform import aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi || true
           terraform import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole || true
 
       - name: Terraform Plan
