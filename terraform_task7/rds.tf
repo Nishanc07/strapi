@@ -1,5 +1,5 @@
 resource "aws_db_subnet_group" "strapi_db_subnet_group" {
-  name       = "strapi-db-subnet-group"
+  name       = "nisha-db-subnet-group"
   subnet_ids = data.aws_subnets.default.ids
 
   tags = {
@@ -16,8 +16,8 @@ resource "aws_db_instance" "nisha_rds" {
   db_name                = "strapidb"
   username               = "nisha"
   password               = "nisha123"
-  db_subnet_group_name   = aws_db_subnet_group.strapi_db_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.nisha_ecr_sg.id]
+  db_subnet_group_name   = aws_db_subnet_group.nisha_db_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.nisha_ecs_sg.id]
   skip_final_snapshot    = true
   publicly_accessible    = true
 
