@@ -24,9 +24,11 @@ data "aws_subnets" "default" {
   }
 }
 
+
+
 # --- IAM Role for ECS ---
 resource "aws_iam_role" "ecs_task_execution_role_new" {
-  name = "ecsTaskExecutionRoleNew"
+  name = "ecsTaskExecutionRole"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
