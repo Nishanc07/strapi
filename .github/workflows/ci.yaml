@@ -28,7 +28,7 @@ jobs:
         id: vars
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          REGION=${{ secrets.AWS_REGION }}
+          REGION=${{ secrets.AWS_DEFAULT_REGION }}
           REPO_NAME=nisha-ecr
           IMAGE_TAG=gh-${GITHUB_SHA::7}
           ECR_REGISTRY="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
