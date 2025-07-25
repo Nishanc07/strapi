@@ -68,3 +68,9 @@ jobs:
         run: |
           cd terraform_task7
           terraform apply -input=false -auto-approve -var="image_tag=${{ env.IMAGE_TAG }}"
+
+      - name: Output Terraform values
+        run: |
+          echo "Fetching Terraform Outputs..."
+          terraform output strapi_url
+          terraform output rds_endpoint
