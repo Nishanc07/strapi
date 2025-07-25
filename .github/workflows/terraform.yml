@@ -1,45 +1,68 @@
-name: Terraform CI
+name: CD - Deploy with Terraform and ECR
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  terraform:
+  deploy:
     runs-on: ubuntu-latest
-
-    env:
-      AWS_REGION: us-east-2
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      IMAGE_TAG: ${{ github.sha }}
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set image tag from commit SHA
+        run: |
+          IMAGE_TAG=gh-${GITHUB_SHA::7}
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.6.6
+          terraform_version: 1.5.7
 
-      - name: Change to Terraform directory
-        run: cd terraform_task7
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Verify ECR image exists
+        run: |
+          aws ecr describe-images \
+            --repository-name nisha-ecr \
+            --image-ids imageTag=${{ env.IMAGE_TAG }} \
+            --region us-east-2 > /dev/null || {
+              echo "Image with tag $IMAGE_TAG not found in ECR.";
+              exit 1;
+          }
 
       - name: Terraform Init
-        run: terraform -chdir=terraform_task7 init
 
-      - name: Terraform Import Resources
         run: |
-          terraform -chdir=terraform_task7 import aws_security_group.nisha_ecs_sg sg-0cf2fc2cb9a7375a0
-          terraform -chdir=terraform_task7 import aws_lb_target_group.nisha_strapi_tg arn:aws:elasticloadbalancing:us-east-2:<your_account_id>:targetgroup/nisha-strapi-tg/0b7d7975021cd54d
-          terraform -chdir=terraform_task7 import aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi
-          terraform -chdir=terraform_task7 import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
-          terraform -chdir=terraform_task7 import aws_db_subnet_group.nisha_db_subnet_group nisha-db-subnet-group
+          cd terraform_task7
+          terraform init
+
+      - name: Terraform Import Existing Resources
+        run: |
+          cd terraform_task7
 
       - name: Terraform Plan
-        run: terraform -chdir=terraform_task7 plan -var="image_tag=${IMAGE_TAG}"
 
+        run: |
+          cd terraform_task7
+          terraform import aws_security_group.nisha_ecs_sg sg-0cf2fc2cb9a7375a0
+          terraform import aws_lb_target_group.nisha_strapi_tg arn:aws:elasticloadbalancing:us-east-2:<account_id>:targetgroup/nisha-strapi-tg/0b7d7975021cd54d
+          terraform import aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi
+          terraform import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
+          terraform import aws_db_subnet_group.nisha_db_subnet_group nisha-db-subnet-group
+          terraform plan -var="image_tag=${{ env.IMAGE_TAG }}"
       - name: Terraform Apply
-        run: terraform -chdir=terraform_task7 apply -auto-approve -var="image_tag=${IMAGE_TAG}"
+        run: |
+          cd terraform_task7
+          terraform apply -auto-approve -var="image_tag=${{ env.IMAGE_TAG }}"
