@@ -47,6 +47,15 @@ jobs:
           cd terraform_task7
           terraform init
 
+      - name: Import existing resources
+        run: |
+          cd terraform_task7
+          terraform init
+          terraform plan
+          terraform import aws_security_group.nisha_ecs_sg sg-xxxx || true
+          terraform import aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi || true
+          terraform import aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole || true
+
       - name: Terraform Plan
         run: |
           cd terraform_task7
