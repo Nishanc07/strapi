@@ -59,5 +59,4 @@ jobs:
 
         run: |
           cd terraform_task7
-          terraform import
           terraform apply -auto-approve -var="image_tag=${{ env.IMAGE_TAG }}"
