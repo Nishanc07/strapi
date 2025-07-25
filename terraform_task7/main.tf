@@ -122,6 +122,11 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+data "aws_ecr_repository" "nisha" {
+  name = "nisha-ecr"
+}
+
+
 resource "aws_ecs_task_definition" "nisha_task" {
   family                   = "nisha-task"
   requires_compatibilities = ["FARGATE"]
