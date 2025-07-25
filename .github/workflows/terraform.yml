@@ -50,7 +50,7 @@ jobs:
       - name: Terraform Import Existing Resources
         run: |
           cd terraform_task7
-          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_security_group.nisha_ecs_sg sg-0cf2fc2cb9a7375a0
+
           terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_lb_target_group.nisha_strapi_tg arn:aws:elasticloadbalancing:us-east-2:***:targetgroup/nisha-strapi-tg/0b7d7975021cd54d
           terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_cloudwatch_log_group.nisha_strapi /ecs/nisha-strapi
           terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
