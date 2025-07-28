@@ -1,0 +1,52 @@
+name: CI pipeline - Build & Push Docker Image
+
+on:
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          use: true
+
+      - name: Set registry user and tag
+        run: |
+          echo "REGISTRY_USER=${{ vars.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+          echo "TAG=gh-${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./my-strapi-project
+          file: ./my-strapi-project/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY_USER }}/strapi:${{ env.TAG }}
+
+      - name: Save image tag as output
+        id: output
+        run: echo "tag=${{ env.TAG }}" >> $GITHUB_OUTPUT
+
+      - name: Create tag.txt file
+        run: echo "${{ env.TAG }}" > tag.txt
+
+      - name: Upload image tag as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-tag
+          path: tag.txt
