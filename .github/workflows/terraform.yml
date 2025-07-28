@@ -44,26 +44,27 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd terraform_task7
+          cd terraform_task8
           terraform init -input=false
 
       - name: Terraform Import Existing Resources
         run: |
-          cd terraform_task7
+          cd terraform_task8
           terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
 
       - name: Terraform Plan
         run: |
-          cd terraform_task7
+          cd terraform_task8
           terraform plan -input=false -var="image_tag=${{ env.IMAGE_TAG }}"
 
       - name: Terraform Apply
         run: |
-          cd terraform_task7
+          cd terraform_task8
           terraform apply -input=false -auto-approve -var="image_tag=${{ env.IMAGE_TAG }}"
 
       - name: Output Terraform values
         run: |
+          cd terraform_task8
           echo "Fetching Terraform Outputs..."
           terraform output strapi_url
           terraform output rds_endpoint
