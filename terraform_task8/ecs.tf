@@ -84,7 +84,7 @@ resource "aws_ecs_service" "nisha_service" {
   force_new_deployment = true
 
   network_configuration {
-    subnets         = data.aws_subnets.default.ids
+    subnets          = slice(data.aws_subnets.default.ids, 0, 2)  # Use only first 2 subnets
     security_groups = [aws_security_group.nisha_sg.id]
     assign_public_ip = true
   }

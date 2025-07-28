@@ -12,7 +12,7 @@ resource "aws_cloudwatch_metric_alarm" "high_cpu" {
     ClusterName = aws_ecs_cluster.nisha_cluster.name
     ServiceName = aws_ecs_service.nisha_service.name
   }
-  alarm_actions = [aws_sns_topic.sns.arn]
+  
 }
 
 resource "aws_cloudwatch_metric_alarm" "high_memory" {
@@ -29,7 +29,7 @@ resource "aws_cloudwatch_metric_alarm" "high_memory" {
     ClusterName = aws_ecs_cluster.nisha_cluster.name
     ServiceName = aws_ecs_service.nisha_service.name
   }
-  alarm_actions = [aws_sns_topic.sns.arn]
+  
 }
 
 resource "aws_cloudwatch_dashboard" "ecs_dashboard" {
