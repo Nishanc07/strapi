@@ -73,8 +73,8 @@ resource "aws_cloudwatch_metric_alarm" "nlb_healthy_hosts" {
   alarm_actions       = [aws_sns_topic.sns.arn]
   ok_actions          = [aws_sns_topic.sns.arn]
   dimensions = {
-    TargetGroup  = aws_lb_target_group.nisha_strapi_tg.arn_suffix
-    LoadBalancer = aws_lb.nisha_lb.arn_suffix
+    TargetGroup  = aws_lb_target_group.nisha_tg.arn_suffix
+    LoadBalancer = aws_lb.nisha_alb.arn_suffix
   }
 
   tags = {
