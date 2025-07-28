@@ -32,6 +32,8 @@ resource "aws_cloudwatch_metric_alarm" "high_memory" {
   
 }
 
+
+
 resource "aws_cloudwatch_dashboard" "ecs_dashboard" {
   dashboard_name = "nisha-strapi-dashboard"
 

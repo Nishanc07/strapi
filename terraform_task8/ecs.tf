@@ -1,6 +1,12 @@
 resource "aws_ecs_cluster" "nisha_cluster" {
   name = "nisha-cluster"
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
+
+
 
 resource "aws_cloudwatch_log_group" "nisha_strapi" {
   name              = "/ecs/nisha-strapi"
