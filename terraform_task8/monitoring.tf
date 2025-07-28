@@ -70,8 +70,8 @@ resource "aws_cloudwatch_metric_alarm" "nlb_healthy_hosts" {
   threshold           = 1
   alarm_description   = "Number of healthy nodes in the Target Group dropped below threshold"
   actions_enabled     = true
-  alarm_actions       = [aws_sns_topic.sns.arn]
-  ok_actions          = [aws_sns_topic.sns.arn]
+#   alarm_actions       = [aws_sns_topic.sns.arn]
+#   ok_actions          = [aws_sns_topic.sns.arn]
   dimensions = {
     TargetGroup  = aws_lb_target_group.nisha_tg.arn_suffix
     LoadBalancer = aws_lb.nisha_alb.arn_suffix
