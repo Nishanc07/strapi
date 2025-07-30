@@ -16,6 +16,7 @@ resource "aws_cloudwatch_log_group" "nisha_strapi" {
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecsTaskExecutionRole"
 
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -26,6 +27,12 @@ resource "aws_iam_role" "ecs_task_execution_role" {
       }
     }]
   })
+
+   lifecycle {
+    ignore_changes = [
+      description
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
