@@ -9,10 +9,6 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# ECS Task Execution Role (Assumes you created it manually or with ECS setup wizard)
-data "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole"
-}
 
 # CodeDeploy Service Role (created manually or via AWS console)
 data "aws_iam_role" "codedeploy_role" {
