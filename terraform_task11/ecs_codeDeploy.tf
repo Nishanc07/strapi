@@ -6,7 +6,7 @@ resource "aws_codedeploy_app" "nisha_strapi" {
 resource "aws_codedeploy_deployment_group" "nisha_strapi_group" {
   app_name               = aws_codedeploy_app.nisha_strapi.name
   deployment_group_name  = "nisha-deployment-group"
-  service_role_arn       = aws_iam_role.codedeploy_role.arn
+  service_role_arn      = data.aws_iam_role.codedeploy_role.arn
   deployment_config_name = "CodeDeployDefault.ECSCanary10Percent5Minutes"
 
   deployment_style {
