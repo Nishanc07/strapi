@@ -1,9 +1,20 @@
-version: 1
-Resources:
-  - TargetService:
-      Type: AWS::ECS::Service
-      Properties:
-        TaskDefinition: "<TASK_DEFINITION>"
-        LoadBalancerInfo:
-          ContainerName: "strapi"
-          ContainerPort: 1337
+- name: Create .aws/appspec.json
+  run: |
+    mkdir -p .aws
+    echo '{
+      "version": 1,
+      "Resources": [
+        {
+          "TargetService": {
+            "Type": "AWS::ECS::Service",
+            "Properties": {
+              "TaskDefinition": <Task_DEfinition>,
+              "LoadBalancerInfo": {
+                "ContainerName": "strapi",
+                "ContainerPort": 1337
+              }
+            }
+          }
+        }
+      ]
+    }' > .aws/appspec.json
