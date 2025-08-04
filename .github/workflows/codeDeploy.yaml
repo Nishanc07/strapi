@@ -64,6 +64,31 @@ jobs:
           container-name: strapi
           image: ${{ env.IMAGE_URI }}
 
+      - name: Create .aws directory
+        run: mkdir -p .aws
+
+      - name: Write appspec.json
+        run: |
+          cat > .aws/appspec.json <<EOL
+          {
+            "version": 1,
+            "Resources": [
+              {
+                "TargetService": {
+                  "Type": "AWS::ECS::Service",
+                  "Properties": {
+                    "TaskDefinition": "REPLACED_AT_RUNTIME",
+                    "LoadBalancerInfo": {
+                      "ContainerName": "strapi",
+                      "ContainerPort": 1337
+                    }
+                  }
+                }
+              }
+            ]
+          }
+          EOL
+
       - name: Set appspec.json values
         id: set-appspec-values
         env:
@@ -74,7 +99,7 @@ jobs:
           codedeploy-application: nisha-codedeploy
           codedeploy-deployment-group: nisha-deployment-group
         run: |
-          mkdir -p .aws
+          cd .aws
           export TASK_DEF_ARN=$(aws ecs describe-task-definition --task-definition=nisha-task | jq -r '.taskDefinition.taskDefinitionArn')
           cat ./.github/workflows/appspec.json | \
             jq --arg key "$TASK_DEF_ARN" '.Resources[].TargetService.Properties.TaskDefinition=$key' | \
