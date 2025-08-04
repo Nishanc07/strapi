@@ -77,14 +77,16 @@ resource "aws_ecs_task_definition" "nisha_task" {
           protocol      = "tcp"
         }
       ]
+
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          awslogs-group         = "/ecs/nisha-strapi",
-          awslogs-region        = "us-east-2",
+          awslogs-group         = aws_cloudwatch_log_group.nisha_strapi.name,
+          awslogs-region        = var.region,
           awslogs-stream-prefix = "ecs"
         }
       }
+
       environment = [
         { name = "DATABASE_CLIENT", value = "postgres" },
         { name = "DATABASE_HOST", value = aws_db_instance.nisha_rds.address },
