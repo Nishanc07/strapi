@@ -1,0 +1,17 @@
+
+terraform.tfstate
+terraform.tfstate.*
+crash.log
+
+.terraform/
+
+*.tfplan
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+*.tfvars
+*.terraform.lock.hcl
+!terraform.tfvars  # (if you want to keep the main tfvars in git, remove this line if not)
