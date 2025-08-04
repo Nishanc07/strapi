@@ -67,15 +67,12 @@ jobs:
           NEW_TASK_DEF=$(jq --arg IMAGE "$IMAGE_URI" '.containerDefinitions[0].image = $IMAGE' task-def.json)
           echo "$NEW_TASK_DEF" > new-task-def.json
 
-      - name: Register new ECS Task Definition
-        id: register-task
-        run: |
-          TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://new-task-def.json \
-            --query "taskDefinition.taskDefinitionArn" \
-            --output text)
-
-          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+      - name: Register ECS Task Definition
+        id: register-task-def
+        uses: aws-actions/amazon-ecs-register-task-definition@v1
+        with:
+          family: nisha-task
+          container-definitions: file://task-definition.json
 
       - name: Create appspec.json
         run: |
@@ -97,12 +94,9 @@ jobs:
             ]
           }" > appspec.json
 
-      - name: Trigger CodeDeploy Deployment
-        run: |
-          APPSPEC_CONTENT=$(jq -Rs . < appspec.json)
-
-          aws deploy create-deployment \
-            --application-name ${{ env.CODEDEPLOY_APP_NAME }} \
-            --deployment-group-name ${{ env.CODEDEPLOY_GROUP_NAME }} \
-            --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
-            --revision "revisionType=AppSpecContent,appSpecContent={content=$APPSPEC_CONTENT}"
+      - name: Deploy to ECS using CodeDeploy
+        uses: aws-actions/aws-codedeploy-deploy-ecs@v1
+        with:
+          application-name: nisha-ecs-app
+          deployment-group: nisha-deploy-group
+          task-definition: ${{ steps.register-task-def.outputs.task-definition-arn }}
