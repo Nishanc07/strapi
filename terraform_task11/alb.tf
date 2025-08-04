@@ -19,7 +19,7 @@ resource "aws_lb_target_group" "nisha_blue" {
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
   health_check {
-    path                = "/"
+    path                = "/admin"
     port                = "1337"
     protocol            = "HTTP"
     interval            = 30
@@ -36,7 +36,7 @@ resource "aws_lb_target_group" "nisha_green" {
   target_type = "ip"
   vpc_id      = data.aws_vpc.default.id
   health_check {
-    path                = "/"
+    path                = "/admin"
     port                = "1337"
     protocol            = "HTTP"
     interval            = 30

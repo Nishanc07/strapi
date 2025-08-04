@@ -31,7 +31,7 @@ jobs:
         run: |
           jq '(.containerDefinitions[] | select(.name=="strapi") | .environment) += [
             { "name": "DATABASE_CLIENT", "value": "postgres" },
-            { "name": "DATABASE_HOST", "value": "your-rds-endpoint.us-east-2.rds.amazonaws.com" },
+            { "name": "DATABASE_HOST", "value": "nisha-postgres-db.cbymg2mgkcu2.us-east-2.rds.amazonaws.com" },
             { "name": "DATABASE_PORT", "value": "5432" },
             { "name": "DATABASE_NAME", "value": "strapidb" },
             { "name": "DATABASE_USERNAME", "value": "nisha" },
