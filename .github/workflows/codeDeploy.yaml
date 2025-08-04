@@ -27,6 +27,25 @@ jobs:
         run: |
           aws ecs describe-task-definition --task-definition "$ecs_task_def_name" --query taskDefinition > task-definition.json
 
+      - name: Inject env vars into task definition
+        run: |
+          jq '(.containerDefinitions[] | select(.name=="strapi") | .environment) += [
+            { name = "DATABASE_CLIENT", value = "postgres" },
+            { name = "DATABASE_HOST", value = aws_db_instance.nisha_rds.address },
+            { name = "DATABASE_PORT", value = "5432" },
+            { name = "DATABASE_NAME", value = "strapidb" },
+            { name = "DATABASE_USERNAME", value = "nisha" },
+            { name = "DATABASE_PASSWORD", value = "nisha123" },
+            { name = "DATABASE_SSL", value = "false" },
+
+            # Strapi secrets
+            { name = "APP_KEYS", value = "090TadpTTRZvuM5Fu75COQ==,c8udgtcvVKlGDIMcmqKu+w==,tsHHrNzqiXFBjHNM/79rbA==,/nRmlzj0U/XxgDh8AYzteA==" },
+            { name = "API_TOKEN_SALT", value = "oo7Y59VwBZjdfVsTevVUAQ==" },
+            { name = "ADMIN_JWT_SECRET", value = "V0bNAdPbUmZPcTeVeRSZDw==" },
+            { name = "TRANSFER_TOKEN_SALT", value = "bvqS1Wdms+TMgaZ+brhE9A==" },
+            { name = "ENCRYPTION_KEY", value = "vYbedSqFjzpJgzGquSU8Mw==" }
+          ]' task-definition.json > task-definition.json.tmp && mv task-definition.json.tmp task-definition.json
+
       - name: Set image variables
         id: vars
         run: |
