@@ -1,75 +1,95 @@
-name: codedeploy
+name: Deploy Strapi via ECS and CodeDeploy
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 env:
-  AWS_REGION: us-east-2
+  AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   ECR_REPOSITORY: nisha-ecr
   ECS_CLUSTER: nisha-cluster
   ECS_SERVICE: nisha-service
-  TASK_DEFINITION_TEMPLATE: taskdef.json
   TASK_DEFINITION_NAME: nisha-task
+  CODEDEPLOY_APP: nisha-codedeploy
+  CODEDEPLOY_GROUP: nisha-deployment-group
   CONTAINER_NAME: strapi
-  DEPLOYMENT_GROUP: nisha-deploy-group
-  APPLICATION_NAME: nisha-codedeploy
-
-permissions:
-  id-token: write
-  contents: read
+  CONTAINER_PORT: "1337"
 
 jobs:
   deploy:
-    name: Deploy to ECS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::607700977843:role/GitHubActionsRole
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push Docker image
-        run: |
-          IMAGE_TAG=${{ github.sha }}
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG 607700977843.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push 607700977843.dkr.ecr.${AWS_REGION}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+      - name: Build and push Docker image
+        id: docker
+        uses: docker/build-push-action@v6
+        with:
+          context: ./my-strapi-project
+          file: ./my-strapi-project/Dockerfile
+          push: true
+          tags: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:gh-${{ github.sha }}
 
-      - name: Render ECS task definition
-        id: render-taskdef
+      - name: Download current task definition
         run: |
-          IMAGE_TAG=${{ github.sha }}
-          sed "s|<IMAGE_PLACEHOLDER>|${IMAGE_TAG}|g" $TASK_DEFINITION_TEMPLATE > rendered-taskdef.json
+          aws ecs describe-task-definition \
+          --task-definition ${{ env.TASK_DEFINITION_NAME }} \
+          --query 'taskDefinition | {family: family, networkMode: networkMode, containerDefinitions: containerDefinitions, requiresCompatibilities: requiresCompatibilities, cpu: cpu, memory: memory, executionRoleArn: executionRoleArn, taskRoleArn: taskRoleArn}' \
+          > task-definition.json
 
-      - name: Register new ECS task definition revision
-        id: register-task-def
+      - name: Update image in task definition
+        run: |
+          IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:gh-${{ github.sha }}"
+          jq --arg IMAGE "$IMAGE" '.containerDefinitions[0].image = $IMAGE' task-definition.json > new-task-def.json
+
+      - name: Register updated task definition
+        id: register-task
         run: |
           TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://rendered-taskdef.json \
-            --query 'taskDefinition.taskDefinitionArn' \
+            --cli-input-json file://new-task-def.json \
+            --query "taskDefinition.taskDefinitionArn" \
             --output text)
-          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+          echo "task-def-arn=$TASK_DEF_ARN" >> $GITHUB_OUTPUT
 
-      - name: Create CodeDeploy deployment
+      - name: Generate appspec.json
         run: |
+          cat > appspec.json <<EOF
+          {
+            "version": 1,
+            "Resources": [
+              {
+                "TargetService": {
+                  "Type": "AWS::ECS::Service",
+                  "Properties": {
+                    "TaskDefinition": "${{ steps.register-task.outputs.task-def-arn }}",
+                    "LoadBalancerInfo": {
+                      "ContainerName": "strapi",
+                      "ContainerPort": "1337"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+          EOF
+
+      - name: Trigger ECS deployment using CodeDeploy
+        run: |
+          BASE64_CONTENT=$(base64 appspec.json | tr -d '\n')
           aws deploy create-deployment \
-            --application-name $APPLICATION_NAME \
-            --deployment-group-name $DEPLOYMENT_GROUP \
+            --application-name ${{ env.CODEDEPLOY_APP }} \
+            --deployment-group-name ${{ env.CODEDEPLOY_GROUP }} \
+            --revision revisionType=AppSpecContent,appSpecContent="{\"content\":\"$BASE64_CONTENT\"}" \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            --file-exists-behavior OVERWRITE \
-            --task-definition $TASK_DEF_ARN \
-            --description "GitHub Actions deployment ${{ github.sha }}" \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+            --description "Deploying commit ${{ github.sha }}"

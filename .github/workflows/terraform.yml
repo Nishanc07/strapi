@@ -47,6 +47,18 @@ jobs:
           cd terraform_task11
           terraform init -input=false
 
+      - name: Terraform Import Existing Resources
+        run: |
+          cd terraform_task8
+          # terraform import aws_iam_role.codedeploy_role CodeDeployServiceRole
+          # terraform import aws_iam_role.ecs_task_role ecsTaskRole
+          # terraform import aws_codedeploy_app.nisha_strapi nisha-codedeploy
+
+
+
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
+          # terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.codedeploy_role CodeDeployServiceRole
+
       - name: Terraform Plan
         run: |
           cd terraform_task11
