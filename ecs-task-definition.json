@@ -1,0 +1,50 @@
+{
+  "family": "nisha-task",
+  "networkMode": "awsvpc",
+  "cpu": "512",
+  "memory": "1024",
+  "requiresCompatibilities": ["FARGATE"],
+  "executionRoleArn": "arn:aws:iam::607700977843:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::607700977843:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "strapi",
+      "image": "607700977843.dkr.ecr.us-east-2.amazonaws.com/nisha-ecr:<IMAGE_PLACEHOLDER>",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 1337,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/nisha-strapi",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "environment": [
+        { "name": "DATABASE_CLIENT", "value": "postgres" },
+        {
+          "name": "DATABASE_HOST",
+          "value": "aws_db_instance.nisha_rds.address"
+        },
+        { "name": "DATABASE_PORT", "value": "5432" },
+        { "name": "DATABASE_NAME", "value": "strapidb" },
+        { "name": "DATABASE_USERNAME", "value": "nisha" },
+        { "name": "DATABASE_PASSWORD", "value": "nisha123" },
+        { "name": "DATABASE_SSL", "value": "false" },
+        {
+          "name": "APP_KEYS",
+          "value": "090TadpTTRZvuM5Fu75COQ==,c8udgtcvVKlGDIMcmqKu+w==,tsHHrNzqiXFBjHNM/79rbA==,/nRmlzj0U/XxgDh8AYzteA=="
+        },
+        { "name": "API_TOKEN_SALT", "value": "oo7Y59VwBZjdfVsTevVUAQ==" },
+        { "name": "ADMIN_JWT_SECRET", "value": "V0bNAdPbUmZPcTeVeRSZDw==" },
+        { "name": "TRANSFER_TOKEN_SALT", "value": "bvqS1Wdms+TMgaZ+brhE9A==" },
+        { "name": "ENCRYPTION_KEY", "value": "vYbedSqFjzpJgzGquSU8Mw==" }
+      ]
+    }
+  ]
+}

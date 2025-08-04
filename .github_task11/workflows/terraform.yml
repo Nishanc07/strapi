@@ -51,6 +51,7 @@ jobs:
         run: |
           cd terraform_task8
           terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.ecs_task_execution_role ecsTaskExecutionRole
+          terraform import -input=false -var="image_tag=${{ env.IMAGE_TAG }}" aws_iam_role.codedeploy_role CodeDeployServiceRole
 
       - name: Terraform Plan
         run: |
