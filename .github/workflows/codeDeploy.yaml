@@ -1,4 +1,4 @@
-name: CD - Deploy with Terraform and ECR
+name: codedeploy
 
 on:
   push:
