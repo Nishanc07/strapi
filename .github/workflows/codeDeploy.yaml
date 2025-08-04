@@ -89,24 +89,6 @@ jobs:
           }
           EOL
 
-      - name: Set appspec.json values
-        id: set-appspec-values
-        env:
-          container_port: 5000
-          container_name: strapi
-          cluster: nisha-cluster
-          service: nisha-service
-          codedeploy-application: nisha-codedeploy
-          codedeploy-deployment-group: nisha-deployment-group
-        run: |
-          cd .aws
-          export TASK_DEF_ARN=$(aws ecs describe-task-definition --task-definition=nisha-task | jq -r '.taskDefinition.taskDefinitionArn')
-          cat ./.github/workflows/appspec.json | \
-            jq --arg key "$TASK_DEF_ARN" '.Resources[].TargetService.Properties.TaskDefinition=$key' | \
-            jq --arg key "$container_port" '.Resources[].TargetService.Properties.LoadBalancerInfo.ContainerPort=$key' | \
-            jq --arg key "$container_name" '.Resources[].TargetService.Properties.LoadBalancerInfo.ContainerName=$key' > .aws/appspec.json
-          sed -i 's#\\"##g' .aws/appspec.json
-
       - name: ECS task deployment using CodeDeploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
