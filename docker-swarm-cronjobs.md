@@ -6,6 +6,8 @@
 
 In Docker Swarm, running periodic jobs like database backups, log rotation, or container clean-up is not natively supported, unlike Kubernetes' CronJob. To bridge this gap, open-source tools such as swarm-cronjob and various workarounds can be used to schedule containerized jobs at specific times
 
+![Alt text](https://github.com/Nishanc07/strapi/blob/main/public/docker-swarm-arch.png)
+
 2. Popular Tools for Swarm Cronjobs
    crazy-max/swarm-cronjob: A Go-based scheduler that continuously scans Docker services labels to trigger tasks according to cron expressions
    ref: https://crazymax.dev/swarm-cronjob/usage/get-started/
@@ -17,7 +19,10 @@ In Docker Swarm, running periodic jobs like database backups, log rotation, or c
    ref: https://github.com/webgriffe/swarm-cron
 
    and many more....
+   ![Alt text](https://github.com/Nishanc07/strapi/blob/main/public/crazymax.png)
+   ![Alt text](https://github.com/Nishanc07/strapi/blob/main/public/Swarm-cron.png)
 
+https://github.com/Nishanc07/strapi/blob/main/public/crazymax.png
 Note: If you prefer a self-managing, label-driven scheduler that integrates seamlessly and doesn’t require external cron files, go with crazy‑max/swarm‑cronjob. It’s widely used and actively maintained.
 
 3. How to deploy this using swarm-cronjob by crazymax
